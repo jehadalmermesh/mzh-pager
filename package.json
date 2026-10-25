@@ -1,0 +1,10 @@
+{
+  "name": "mzh-pager",
+  "version": "1.0.0",
+  "description": "بيجر مزهرية الإلكتروني — مستقل تماماً عن نظام جرس",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}
