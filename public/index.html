@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4EDE2">
+<title>مزهرية · البيجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#F4EDE2; --milk:#FBF8F2; --card:#FFFDF9; --beige:#D9C7AA; --beige-d:#B89F7A;
+  --ink:#3A3026; --muted:#8C7D6B; --ok:#6E8B5E; --line:#E8DDCC;
+  --shadow:0 20px 50px -20px rgba(90,70,40,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  background-image:radial-gradient(circle at 15% 0%,#fff8ec 0,transparent 45%),radial-gradient(circle at 100% 100%,#eadcc5 0,transparent 50%)}
+button{font:inherit;border:0;cursor:pointer}
+.hidden{display:none!important}
+
+/* brand */
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;letter-spacing:.5px}
+.logo svg{width:34px;height:34px}
+
+/* ========== CASHIER ========== */
+#cashier{min-height:100%;display:grid;grid-template-columns:1fr 420px;gap:24px;padding:24px}
+.panel{background:var(--milk);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.newbtn{background:var(--ink);color:var(--milk);padding:16px 28px;border-radius:18px;font-size:18px;font-weight:600;display:flex;gap:10px;align-items:center;transition:transform .15s}
+.newbtn:active{transform:scale(.96)}
+.orders{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ord{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;animation:pop .35s ease}
+.ord .n{font-size:40px;font-weight:700;line-height:1}
+.ord .s{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--beige-d);animation:pulse 1.4s infinite}
+.ord.ready{background:#EEF2E8;border-color:#CBD8BF}
+.ord.ready .dot{background:var(--ok);animation:none}
+.ord .acts{display:flex;gap:8px}
+.ord button{flex:1;padding:12px;border-radius:14px;font-weight:600;font-size:15px}
+.b-ready{background:var(--beige);color:var(--ink)}
+.b-show{background:transparent;border:1px solid var(--line)!important;color:var(--muted);flex:0 0 48px!important}
+.b-done{background:var(--ok);color:#fff}
+.empty{color:var(--muted);text-align:center;padding:70px 0}
+.empty b{display:block;font-size:20px;color:var(--ink);margin-bottom:6px}
+
+.qrside{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
+.qrside .lbl{color:var(--muted);font-size:15px}
+.qrside .num{font-size:64px;font-weight:700;line-height:1}
+.qrbox{background:#fff;padding:22px;border-radius:26px;border:1px solid var(--line)}
+.qrbox img,.qrbox canvas{display:block;width:260px!important;height:260px!important}
+.hint{font-size:14px;color:var(--muted);max-width:280px;line-height:1.7}
+.qrph{width:304px;height:304px;border:2px dashed var(--line);border-radius:26px;display:grid;place-items:center;color:var(--muted)}
+
+@media (max-width:900px){#cashier{grid-template-columns:1fr}.qrside{order:-1}}
+
+/* ========== CUSTOMER ========== */
+#customer{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));text-align:center;transition:background .5s}
+.c-mid{display:flex;flex-direction:column;align-items:center;gap:22px;flex:1;justify-content:center;width:100%}
+.ring{position:relative;width:230px;height:230px;display:grid;place-items:center}
+.ring::before,.ring::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--beige);animation:wave 2.6s infinite}
+.ring::after{animation-delay:1.3s}
+.core{width:170px;height:170px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);z-index:1}
+.core small{font-size:13px;color:var(--muted)}
+.core b{font-size:58px;line-height:1.1}
+.c-title{font-size:24px;font-weight:700}
+.c-sub{color:var(--muted);font-size:15px;line-height:1.8;max-width:300px}
+.cta{width:100%;max-width:340px;background:var(--ink);color:var(--milk);padding:18px;border-radius:20px;font-size:18px;font-weight:600}
+.tip{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;justify-content:center}
+
+/* ready state */
+#customer.is-ready{background:var(--ink);color:var(--milk);animation:flash 1s infinite}
+#customer.is-ready .core{background:var(--milk);color:var(--ink);animation:beat .8s infinite}
+#customer.is-ready .ring::before,#customer.is-ready .ring::after{border-color:var(--beige);animation-duration:1s}
+#customer.is-ready .c-sub{color:var(--beige)}
+#customer.is-ready .cta{background:var(--beige);color:var(--ink)}
+#customer.is-ready .logo{color:var(--milk)}
+#customer.done{background:var(--bg);animation:none}
+
+@keyframes wave{0%{transform:scale(.75);opacity:1}100%{transform:scale(1.25);opacity:0}}
+@keyframes pulse{50%{opacity:.3}}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+@keyframes beat{50%{transform:scale(1.08)}}
+@keyframes flash{50%{background:#5a4a38}}
+</style>
+</head>
+<body>
+
+<!-- ======= CASHIER (iPad) ======= -->
+<main id="cashier" class="hidden">
+  <section class="panel">
+    <div class="top">
+      <div class="logo" data-logo></div>
+      <button class="newbtn" id="newOrder">＋ طلب جديد</button>
+    </div>
+    <div class="orders" id="orders"></div>
+    <div class="empty" id="empty"><b>لا توجد طلبات حالياً</b>اضغط «طلب جديد» ليظهر الباركود للزبون</div>
+  </section>
+  <aside class="panel qrside">
+    <div id="qrEmpty" class="qrph">الباركود يظهر هنا</div>
+    <div id="qrWrap" class="hidden" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div class="lbl">رقم الطلب</div>
+      <div class="num" id="qrNum">—</div>
+      <div class="qrbox"><div id="qr"></div></div>
+      <div class="hint">وجّه كاميرا جوالك على الباركود.. وبننبهك أول ما يجهز طلبك ☕</div>
+    </div>
+  </aside>
+</main>
+
+<!-- ======= CUSTOMER (phone) ======= -->
+<main id="customer" class="hidden">
+  <div class="logo" data-logo></div>
+  <div class="c-mid">
+    <div class="ring"><div class="core"><small>طلبك رقم</small><b id="cNum">—</b></div></div>
+    <div class="c-title" id="cTitle">أهلاً فيك 🤍</div>
+    <div class="c-sub" id="cSub">اضغط الزر عشان نقدر ننبهك بصوت واهتزاز أول ما يجهز طلبك</div>
+  </div>
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px">
+    <button class="cta" id="cBtn">فعّل التنبيه</button>
+    <div class="tip" id="cTip">خلّ الصفحة مفتوحة · الشاشة بتبقى شغّالة تلقائياً</div>
+  </div>
+</main>
+
+<script>
+const API = "/api/o/";   // سيرفر البيجر الخاص بمزهرية
+const LOGO = `<svg viewBox="0 0 40 40" fill="none"><path d="M13 6h14l-2 6c4 3 7 8 7 13 0 7-5 11-12 11S8 32 8 25c0-5 3-10 7-13l-2-6Z" fill="#D9C7AA" stroke="currentColor" stroke-width="1.6"/><path d="M20 12c-3 4-3 9 0 13 3-4 3-9 0-13Z" fill="currentColor" opacity=".35"/></svg><span>مزهرية</span>`;
+document.querySelectorAll("[data-logo]").forEach(e=>e.innerHTML=LOGO);
+const $=id=>document.getElementById(id);
+const q=new URLSearchParams(location.search);
+
+/* ================= CASHIER ================= */
+function cashier(){
+  $("cashier").classList.remove("hidden");
+  let st={seq:0,orders:[]};
+  try{st=JSON.parse(localStorage.getItem("mzh-pager-standalone-v1"))||st}catch(e){}
+  const save=()=>{try{localStorage.setItem("mzh-pager-standalone-v1",JSON.stringify(st))}catch(e){}};
+  const tok=()=>Array.from(crypto.getRandomValues(new Uint8Array(10)),b=>b.toString(36).padStart(2,"0")).join("");
+  const link=o=>location.origin+location.pathname+"?o="+o.n+"&t="+o.t;
+  let qrObj=null;
+
+  function showQR(o){
+    $("qrEmpty").classList.add("hidden");$("qrWrap").classList.remove("hidden");
+    $("qrNum").textContent=o.n;$("qr").innerHTML="";
+    qrObj=new QRCode($("qr"),{text:link(o),width:520,height:520,colorDark:"#3A3026",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  }
+  function hideQR(){$("qrEmpty").classList.remove("hidden");$("qrWrap").classList.add("hidden")}
+
+  function render(){
+    const box=$("orders");box.innerHTML="";
+    $("empty").classList.toggle("hidden",st.orders.length>0);
+    st.orders.forEach(o=>{
+      const d=document.createElement("div");d.className="ord"+(o.ready?" ready":"");
+      d.innerHTML=`<div class="n">${o.n}</div>
+        <div class="s"><span class="dot"></span>${o.ready?"تم تنبيه الزبون":"قيد التحضير"}</div>
+        <div class="acts">${o.ready
+          ?`<button class="b-done">تم الاستلام</button>`
+          :`<button class="b-ready">جاهز 🔔</button><button class="b-show" title="عرض الباركود">▦</button>`}</div>`;
+      if(o.ready){
+        d.querySelector(".b-done").onclick=()=>{st.orders=st.orders.filter(x=>x!==o);send(o,"done");save();render()};
+      }else{
+        d.querySelector(".b-ready").onclick=()=>{o.ready=true;send(o,"ready");save();render();hideQR()};
+        d.querySelector(".b-show").onclick=()=>showQR(o);
+      }
+      box.appendChild(d);
+    });
+  }
+  function send(o,msg){fetch(API+o.t,{method:"POST",body:msg}).then(r=>{if(!r.ok)throw 0}).catch(()=>alert("تعذّر الإرسال، تأكد من الإنترنت"))}
+
+  $("newOrder").onclick=()=>{
+    st.seq=st.seq>=999?1:st.seq+1;
+    const o={n:st.seq,t:tok(),ready:false};
+    st.orders.unshift(o);save();render();showQR(o);
+  };
+  render();
+}
+
+/* ================= CUSTOMER ================= */
+function customer(){
+  $("customer").classList.remove("hidden");
+  const num=q.get("o"),tk=q.get("t");
+  $("cNum").textContent=num;
+  let armed=false,ready=false,ctx=null,loop=null,wake=null,es=null;
+
+  async function keepAwake(){try{wake=await navigator.wakeLock.request("screen")}catch(e){}}
+  function chime(){
+    if(!ctx)return;
+    const t=ctx.currentTime;
+    [880,1175,1568,1175].forEach((f,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type="sine";o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+i*.18);g.gain.linearRampToValueAtTime(.9,t+i*.18+.02);
+      g.gain.exponentialRampToValueAtTime(.001,t+i*.18+.5);
+      o.connect(g).connect(ctx.destination);o.start(t+i*.18);o.stop(t+i*.18+.55);
+    });
+    navigator.vibrate&&navigator.vibrate([400,150,400,150,700]);
+  }
+  function onMsg(m){
+    if(m==="ready"&&!ready){
+      ready=true;
+      $("customer").classList.add("is-ready");
+      $("cTitle").textContent="طلبك جاهز! ✨";
+      $("cSub").textContent="تفضّل استلمه من الكاشير";
+      $("cBtn").textContent="تم، أوقف التنبيه";$("cBtn").classList.remove("hidden");
+      $("cTip").textContent="";
+      chime();loop=setInterval(chime,1800);
+      try{if(Notification.permission==="granted")new Notification("مزهرية",{body:"طلبك رقم "+num+" جاهز ✨"})}catch(e){}
+    }
+    if(m==="done")stop(true);
+  }
+  function stop(fin){
+    clearInterval(loop);navigator.vibrate&&navigator.vibrate(0);
+    if(fin||ready){
+      $("customer").classList.remove("is-ready");$("customer").classList.add("done");
+      $("cTitle").textContent="بالعافية 🤍";$("cSub").textContent="شكراً لزيارتك مزهرية";
+      $("cBtn").classList.add("hidden");es&&es.close();
+    }
+  }
+  function listen(){
+    es=new EventSource(API+tk+"/events");
+    es.onmessage=e=>onMsg(e.data);
+  }
+  async function poll(){
+    try{
+      const r=await fetch(API+tk,{cache:"no-store"});
+      onMsg((await r.json()).status);
+    }catch(e){}
+  }
+
+  $("cBtn").onclick=async()=>{
+    if(ready){stop(true);return}
+    if(armed)return;armed=true;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const s=ctx.createBuffer(1,1,22050),b=ctx.createBufferSource();b.buffer=s;b.connect(ctx.destination);b.start(); // unlock audio
+    navigator.vibrate&&navigator.vibrate(60);
+    try{if(window.Notification&&Notification.permission==="default")await Notification.requestPermission()}catch(e){}
+    keepAwake();
+    $("cBtn").classList.add("hidden");
+    $("cTitle").textContent="نحضّر طلبك الحين";
+    $("cSub").textContent="ارتاح.. بنرنّ ونهزّ جوالك أول ما يجهز";
+    listen();poll();setInterval(poll,6000);
+  };
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){poll();if(armed&&!wake)keepAwake();ctx&&ctx.resume()}});
+  poll(); // لو الطلب جهز قبل لا يفتح الصفحة
+}
+
+q.get("t")?customer():cashier();
+</script>
+</body>
+</html>
