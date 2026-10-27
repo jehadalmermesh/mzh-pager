@@ -331,6 +331,8 @@ function customer(){
 
   async function arm(){
     if(armed)return;armed=true;
+    // آيفون: نخلي الصوت يشتغل كوسائط عشان ما ينكتم إذا الجوال على الصامت
+    try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}
     try{
       ctx=new (window.AudioContext||window.webkitAudioContext)();
       const b=ctx.createBufferSource();b.buffer=ctx.createBuffer(1,1,22050);b.connect(ctx.destination);b.start();
