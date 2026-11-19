@@ -22,7 +22,11 @@ function loadSettings() {
   const env = { brand: "BRAND", menu: "LINK_MENU", maps: "LINK_MAPS", review: "LINK_REVIEW", website: "LINK_WEBSITE",
     instagram: "LINK_INSTAGRAM", tiktok: "LINK_TIKTOK", x: "LINK_X", snapchat: "LINK_SNAPCHAT" };
   for (const [k, v] of Object.entries(env)) if (process.env[v]) s[k] = process.env[v];
-  for (const k of Object.keys(s)) if (k !== "brand" && s[k] && !/^https:\/\//.test(s[k])) delete s[k];
+  const okURL = v => typeof v === "string" && (/^https:\/\//.test(v) || /^\/promos\/[\w.-]+$/.test(v));
+  for (const k of Object.keys(s)) if (!["brand", "promos"].includes(k) && s[k] && !okURL(s[k])) delete s[k];
+  if (process.env.BACKGROUND) s.background = process.env.BACKGROUND;
+  s.promos = (Array.isArray(s.promos) ? s.promos : []).filter(p => p && typeof p.title === "string").slice(0, 6)
+    .map(p => ({ title: p.title.slice(0, 40), sub: typeof p.sub === "string" ? p.sub.slice(0, 60) : "", image: okURL(p.image) ? p.image : "", link: okURL(p.link) ? p.link : "" }));
   return { brand: s.brand || "مزهرية", ...s, tags: TAGS };
 }
 const SETTINGS = loadSettings();
@@ -65,8 +69,17 @@ function get(token, create) {
   }
   return o;
 }
+// متوسط وقت التحضير آخر 7 أيام (يتحدث كل 5 دقايق) — للتقدير عند العميل
+let etaCache = { at: 0, v: null };
+function eta() {
+  if (Date.now() - etaCache.at < 300000) return etaCache.v;
+  const from = Date.now() - 7 * 86400000;
+  const a = [...orders.values()].filter(o => o.num != null && o.readyAt && o.created >= from).map(o => o.readyAt - o.created).filter(x => x > 30000 && x < 3600000);
+  etaCache = { at: Date.now(), v: a.length >= 3 ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null };
+  return etaCache.v;
+}
 const view = o => ({
-  status: o.status, num: o.num, created: o.created, readyAt: o.readyAt || null,
+  status: o.status, num: o.num, created: o.created, readyAt: o.readyAt || null, eta: eta(),
   comingAt: o.comingAt || null, rated: o.stars != null, now: Date.now(),
 });
 const brief = (t, o) => ({ t, num: o.num, status: o.status, scanned: !!o.scannedAt, coming: !!o.comingAt, stars: o.stars ?? null });
@@ -162,7 +175,7 @@ function stats(days) {
 }
 
 /* ---------- الملفات ---------- */
-const TYPES = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".js": "text/javascript; charset=utf-8" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".js": "text/javascript; charset=utf-8", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
 function file(res, name, cache) {
   const p = path.join(PUB, name);
   if (!p.startsWith(PUB) || !fs.existsSync(p)) return false;
@@ -304,6 +317,7 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET") {
     if (p === "/sw.js") return file(res, "sw.js", "no-cache");
     if (/^\/[a-z0-9-]+\.png$/.test(p) && file(res, p.slice(1))) return;
+    if (/^\/promos\/[\w.-]+\.(jpe?g|png|webp)$/i.test(p)) { if (file(res, p.slice(1))) return; return json(res, 404, { error: "not found" }); }
     return file(res, "index.html", "no-cache");
   }
   json(res, 404, { error: "not found" });
