@@ -18,7 +18,7 @@
 </script>
 <title>مزهرية · البيجر</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
@@ -39,9 +39,14 @@ a{color:inherit;text-decoration:none}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:22px;letter-spacing:.5px}
 .logo .mark{display:block;width:34px;height:50px;background:currentColor;-webkit-mask:url(/logo.png) center/contain no-repeat;mask:url(/logo.png) center/contain no-repeat}
 
-/* dot-matrix */
-.dm{display:block;direction:ltr}
-.dm circle.off{opacity:.13}
+/* المزهرية: تمتلي قهوة وقت التحضير وتزهر لما يجهز الطلب */
+.vase{display:block;direction:ltr;overflow:visible;height:auto}
+.vase .num{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:-1px}
+.vase .stem{stroke-dasharray:160;stroke-dashoffset:160;animation:draw 1.1s .2s ease-out forwards}
+.vase .head{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:bloom .9s cubic-bezier(.3,1.6,.5,1) forwards}
+.vase .sway{transform-box:view-box;transform-origin:100px 24px;animation:sway 4s ease-in-out infinite}
+.vase .bub{animation:rise 3.2s ease-in infinite;opacity:0}
+.vase .shine{animation:shine 5s ease-in-out infinite}
 
 /* ========== CASHIER ========== */
 #cashier{min-height:100%;display:grid;grid-template-columns:1fr 400px;gap:24px;padding:24px}
@@ -104,10 +109,9 @@ a{color:inherit;text-decoration:none}
 /* ========== CUSTOMER ========== */
 #customer{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:18px;padding:calc(24px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom));text-align:center;transition:background .5s}
 .c-mid{display:flex;flex-direction:column;align-items:center;gap:18px;flex:1;justify-content:center;width:100%}
-.board{background:var(--ink);color:var(--beige);border-radius:30px;padding:26px 30px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:12px;position:relative}
-.board small{font-size:13px;color:var(--beige-d)}
-.board .scan{position:absolute;inset:0;border-radius:30px;overflow:hidden;pointer-events:none}
-.board .scan::after{content:"";position:absolute;left:0;right:0;height:40%;background:linear-gradient(transparent,rgba(217,199,170,.10),transparent);animation:scan 3s linear infinite}
+.board{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.board small{font-size:13px;color:var(--muted);letter-spacing:.3px}
+.board .vase{width:210px;filter:drop-shadow(0 22px 30px rgba(90,70,40,.18))}
 .timer{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px 16px;font-size:15px;color:var(--muted)}
 .timer b{color:var(--ink);font-size:17px}
 .c-title{font-size:24px;font-weight:700}
@@ -137,11 +141,12 @@ a{color:inherit;text-decoration:none}
 .a2hs .x{margin-top:12px;width:100%;padding:10px;border-radius:12px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:13px}
 
 /* ready state: كل الشاشة لوحة نقاط */
-#readyView{position:fixed;inset:0;z-index:5;background:var(--ink);color:var(--beige);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(30px + env(safe-area-inset-top)) 24px calc(26px + env(safe-area-inset-bottom));text-align:center;animation:flash 1s infinite}
-#readyView .grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(217,199,170,.10) 32%,transparent 34%);background-size:22px 22px;pointer-events:none}
+#readyView{position:fixed;inset:0;z-index:5;background:var(--ink);color:var(--beige);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(30px + env(safe-area-inset-top)) 24px calc(26px + env(safe-area-inset-bottom));text-align:center;animation:none}
+#readyView .grid{position:absolute;inset:0;pointer-events:none;overflow:hidden;background:radial-gradient(circle at 50% 42%,rgba(217,199,170,.22) 0,transparent 55%)}
+#readyView .grid i{position:absolute;top:-30px;width:14px;height:20px;border-radius:14px 0;background:var(--beige);opacity:.0;animation:petal linear infinite}
 #readyView .logo{color:var(--milk);position:relative}
 #readyView .rmid{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px}
-#readyView .rmid .dm{width:min(78vw,340px);height:auto;animation:beat .8s infinite}
+#readyView .rmid .vase{width:min(66vw,290px);animation:beat 1.6s ease-in-out infinite}
 #readyView h1{font-size:40px;color:var(--milk)}
 #readyView p{font-size:17px;color:var(--beige)}
 #readyView .cta{position:relative;background:var(--milk);color:var(--ink)!important;font-size:20px}
@@ -190,7 +195,12 @@ a{color:inherit;text-decoration:none}
 @keyframes pop{from{transform:scale(.94);opacity:0}}
 @keyframes beat{50%{transform:scale(1.05)}}
 @keyframes flash{50%{background:#4d3f31}}
-@keyframes scan{from{top:-40%}to{top:100%}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes bloom{to{transform:scale(1)}}
+@keyframes sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:.7}100%{transform:translateY(-70px);opacity:0}}
+@keyframes shine{0%,100%{opacity:.35}50%{opacity:.6}}
+@keyframes petal{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.55}100%{transform:translateY(110vh) rotate(540deg);opacity:0}}
 </style>
 </head>
 <body>
@@ -240,7 +250,7 @@ a{color:inherit;text-decoration:none}
 <main id="customer" class="hidden">
   <div class="logo" data-logo></div>
   <div class="c-mid" id="cMid">
-    <div class="board"><div class="scan"></div><small>طلبك رقم</small><div id="cNum"></div></div>
+    <div class="board"><small>طلبك رقم</small><div id="cNum"></div></div>
     <div class="timer"><span id="tLbl">وقت الانتظار</span><b class="mono" id="tVal">00:00</b></div>
     <div class="c-title" id="cTitle">أهلاً فيك 🤍</div>
     <div class="c-sub" id="cSub">اضغط الزر عشان نقدر ننبهك أول ما يجهز طلبك</div>
@@ -264,7 +274,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </main>
 <div id="readyView" class="hidden">
-  <div class="grid"></div>
+  <div class="grid"><i style="left:8%;animation-duration:9s;animation-delay:0s"></i><i style="left:22%;animation-duration:11s;animation-delay:2.5s"></i><i style="left:41%;animation-duration:8s;animation-delay:1s"></i><i style="left:58%;animation-duration:12s;animation-delay:4s"></i><i style="left:73%;animation-duration:10s;animation-delay:0.5s"></i><i style="left:88%;animation-duration:9.5s;animation-delay:3s"></i></div>
   <div class="logo" data-logo></div>
   <div class="rmid"><div id="rNum"></div><h1>طلبك جاهز</h1><p>تفضّل استلمه من الكاونتر</p></div>
   <div class="bottom">
@@ -301,26 +311,47 @@ const post=(u,b)=>fetch(u,{method:"POST",headers:{"Content-Type":"application/js
 function logos(){document.querySelectorAll("[data-logo]").forEach(e=>e.innerHTML=`<i class="mark"></i><span>${S.brand}</span>`)}
 logos();
 
-/* ---------- لوحة النقاط (أرقام 5×7) ---------- */
-const FONT={
-"0":["01110","10001","10011","10101","11001","10001","01110"],
-"1":["00100","01100","00100","00100","00100","00100","01110"],
-"2":["01110","10001","00001","00010","00100","01000","11111"],
-"3":["11111","00010","00100","00010","00001","10001","01110"],
-"4":["00010","00110","01010","10010","11111","00010","00010"],
-"5":["11111","10000","11110","00001","00001","10001","01110"],
-"6":["00110","01000","10000","11110","10001","10001","01110"],
-"7":["11111","00001","00010","00100","01000","01000","01000"],
-"8":["01110","10001","10001","01110","10001","10001","01110"],
-"9":["01110","10001","10001","01111","00001","00010","01100"]};
-function matrix(str,cell){
-  str=String(str??"").replace(/[^0-9]/g,"")||"0";cell=cell||16;
-  const cols=str.length*6-1,w=cols*cell,h=7*cell,r=cell*.38;let c="";
-  [...str].forEach((ch,i)=>FONT[ch].forEach((row,y)=>[...row].forEach((b,x)=>{
-    c+=`<circle cx="${(i*6+x)*cell+cell/2}" cy="${y*cell+cell/2}" r="${r}"${b==="1"?"":' class="off"'} fill="currentColor"/>`;
-  })));
-  return `<svg class="dm" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${c}</svg>`;
+/* ---------- المزهرية ---------- */
+// fill: 0..1 مستوى القهوة · bloom: تطلع الورود · dark: للشاشة الداكنة
+const VBODY="M84 24 H116 V66 C116 92 184 104 184 172 A84 84 0 0 1 16 172 C16 104 84 92 84 66 Z";
+const VBOTTOM=254,VTOP=60;
+const lvlY=f=>-(Math.max(0,Math.min(1,f))*(VBOTTOM-VTOP));
+function vase(num,o){
+  o=o||{};const id="v"+Math.random().toString(36).slice(2,8),dk=!!o.dark,f=o.fill??.3;
+  const C=dk?{stroke:"#D9C7AA",body:"rgba(255,255,255,.05)",l1:"#E6D3B3",l2:"#B89F7A",txt:"#D9C7AA",on:"#3A3026"}
+            :{stroke:"#3A3026",body:"#FFFDF9",l1:"#A8774D",l2:"#5E4330",txt:"#3A3026",on:"#FBF8F2"};
+  let w=`M-220 ${VBOTTOM}`;for(let x=-220;x<420;x+=50)w+=` q12.5 -7 25 0 q12.5 7 25 0`;w+=` V560 H-220 Z`;
+  // clipPath ما يقبل <g>، فالمستوى يكون على المسار نفسه والموجة تنضاف فوقه
+  const wave=`<path class="lvl" d="${w}" transform="translate(0 ${lvlY(f)})"><animateTransform attributeName="transform" type="translate" from="0 0" to="50 0" dur="2.6s" additive="sum" repeatCount="indefinite"/></path>`;
+  const s=String(num??"");const fs=s.length<=2?84:s.length===3?64:50;
+  const text=c=>s?`<text class="num" x="100" y="176" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" fill="${c}">${s}</text>`:"";
+  const bubbles=[60,98,132,80,118].map((x,i)=>`<circle class="bub" cx="${x}" cy="${236-i*6}" r="${2+i%2}" fill="${C.on}" style="animation-delay:${i*.6}s"/>`).join("");
+  const flower=(x,y,r,d,col)=>`<g class="head" style="animation-delay:${d}s">${[0,60,120,180,240,300].map(a=>`<ellipse cx="${x}" cy="${y-r}" rx="${r*.55}" ry="${r}" fill="${col}" transform="rotate(${a} ${x} ${y})"/>`).join("")}<circle cx="${x}" cy="${y}" r="${r*.55}" fill="${dk?"#FBF8F2":"#E2A93B"}"/></g>`;
+  const pet=dk?["#FBF8F2","#E6D3B3","#F2E6D4"]:["#D9C7AA","#B89F7A","#E8D6BA"];
+  const bloom=o.bloom?`<g class="sway">
+    <path class="stem" d="M100 30 C98 0 74 -18 60 -50" fill="none" stroke="${C.stroke}" stroke-width="3" stroke-linecap="round"/>
+    <path class="stem" d="M100 30 C101 0 100 -40 102 -78" fill="none" stroke="${C.stroke}" stroke-width="3" stroke-linecap="round" style="animation-delay:.35s"/>
+    <path class="stem" d="M100 30 C103 2 128 -14 142 -42" fill="none" stroke="${C.stroke}" stroke-width="3" stroke-linecap="round" style="animation-delay:.5s"/>
+    <path class="stem" d="M101 -20 C112 -26 120 -24 124 -16 C114 -12 106 -14 101 -20Z" fill="${C.stroke}" style="animation-delay:.6s;stroke-dasharray:none;stroke-dashoffset:0;opacity:.85"/>
+    ${flower(60,-50,13,1.0,pet[0])}${flower(102,-80,16,1.25,pet[1])}${flower(142,-42,12,1.45,pet[2])}</g>`:"";
+  return `<svg class="vase" viewBox="0 ${o.bloom?-105:0} 200 ${o.bloom?365:260}" width="200" height="${o.bloom?365:260}">
+  <defs>
+    <clipPath id="${id}c"><path d="${VBODY}"/></clipPath>
+    <clipPath id="${id}l"><path d="${VBODY}"/></clipPath>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.l1}"/><stop offset="1" stop-color="${C.l2}"/></linearGradient>
+    <clipPath id="${id}w">${wave}</clipPath>
+  </defs>
+  ${bloom}
+  <rect x="78" y="16" width="44" height="10" rx="5" fill="${C.stroke}"/>
+  <path d="${VBODY}" fill="${C.body}"/>
+  <g clip-path="url(#${id}c)"><g fill="url(#${id}g)">${wave}</g><g clip-path="url(#${id}w)">${bubbles}</g></g>
+  ${text(C.txt)}
+  <g clip-path="url(#${id}w)"><g clip-path="url(#${id}l)">${text(C.on)}</g></g>
+  <path class="shine" d="M40 150 C40 128 54 112 70 104" fill="none" stroke="${dk?"#fff":"#fff"}" stroke-width="5" stroke-linecap="round" opacity=".4"/>
+  <path d="${VBODY}" fill="none" stroke="${C.stroke}" stroke-width="3.5" stroke-linejoin="round"/>
+</svg>`;
 }
+function setLevel(el,f){el&&el.querySelectorAll(".lvl").forEach(p=>p.setAttribute("transform",`translate(0 ${lvlY(f)})`))}
 
 /* ================= CASHIER ================= */
 function cashier(){
@@ -422,12 +453,12 @@ function cashier(){
 /* ================= DISPLAY ================= */
 function displayScreen(){
   $("display").classList.remove("hidden");
-  $("dIdleDm").innerHTML=matrix("00",14);
+  $("dIdleDm").innerHTML=vase("",{fill:.18});$("dIdleDm").firstChild.style.width="170px";
   let timer=null;
   function idle(){$("dIdle").classList.remove("hidden");$("dLive").classList.add("hidden")}
   function show(d){
     $("dIdle").classList.add("hidden");$("dLive").classList.remove("hidden");
-    $("dNum").innerHTML=matrix(d.num,18);$("dQr").innerHTML="";
+    $("dNum").innerHTML=vase(d.num,{fill:.45});$("dNum").firstChild.style.width="190px";$("dQr").innerHTML="";
     if(window.QRCode)new QRCode($("dQr"),{text:location.origin+"/?o="+d.num+"&t="+d.t,width:600,height:600,colorDark:"#3A3026",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
     clearTimeout(timer);timer=setTimeout(idle,3*60*1000); // لو ما أحد مسحه خلال 3 دقايق
   }
@@ -459,7 +490,7 @@ function renderLinks(){
 function customer(){
   $("customer").classList.remove("hidden");
   const num=q.get("o"),tk=q.get("t");
-  $("cNum").innerHTML=matrix(num,14);$("rNum").innerHTML=matrix(num,20);
+  $("cNum").innerHTML=vase(num,{fill:.12});$("rNum").innerHTML=vase(num,{fill:1,bloom:true,dark:true});
   $("a2hsName").textContent="طلب "+num;
   const ua=navigator.userAgent;
   const isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
@@ -474,6 +505,8 @@ function customer(){
     if(!created)return;
     const ms=(readyAt||Date.now()+skew)-created;
     $("tVal").textContent=fmt(ms);$("rTime").textContent=fmt(ms);
+    // القهوة تعلى مع الوقت (تقريباً تمتلي خلال 6 دقايق) وتكتمل لما يجهز الطلب
+    if(!finished)setLevel($("cNum"),readyAt?1:.12+.73*Math.min(1,ms/360000));
   },1000);
 
   function apply(d){
@@ -523,6 +556,7 @@ function customer(){
     $("cTitle").textContent="بالعافية 🤍";$("cSub").textContent="شكراً لزيارتك "+S.brand;
     $("cBtn").classList.add("hidden");$("a2hs").classList.add("hidden");$("pushChip").classList.add("hidden");$("cTip").textContent="";
     document.querySelector(".timer").classList.add("hidden");
+    $("cNum").innerHTML=vase(num,{fill:1,bloom:true});
     showRating();
     es&&es.close();
   }
