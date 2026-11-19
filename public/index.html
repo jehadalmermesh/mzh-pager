@@ -522,7 +522,49 @@ function customer(){
   }
 
   async function keepAwake(){try{wake=await navigator.wakeLock.request("screen")}catch(e){}}
+
+  /* ---- وضع الخلفية: صوت شبه صامت يخلي سفاري شغّال حتى لو قفل الجوال أو طلع من الصفحة ---- */
+  let bg=null,bgOn=false,urls=null;
+  function wavURL(sec,fn){
+    const rate=22050,n=Math.floor(sec*rate),buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+    const str=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+    str(0,"RIFF");v.setUint32(4,36+n*2,true);str(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+    v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);str(36,"data");v.setUint32(40,n*2,true);
+    for(let i=0;i<n;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,fn(i/rate)))*32767,true);
+    return URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
+  }
+  function makeSounds(){
+    if(urls)return urls;
+    const notes=[880,1175,1568,1175];
+    urls={
+      quiet:wavURL(2,()=>(Math.random()*2-1)*0.0006),
+      ring:wavURL(1.9,t=>{let s=0;notes.forEach((f,i)=>{const d=t-i*.18;if(d>=0&&d<.55)s+=Math.sin(2*Math.PI*f*d)*Math.min(1,d/.02)*Math.exp(-d*7)*.55});return s})
+    };
+    return urls;
+  }
+  function lockScreen(title,sub){
+    try{
+      if(!("mediaSession" in navigator))return;
+      navigator.mediaSession.metadata=new MediaMetadata({title,artist:sub,album:S.brand,artwork:[{src:"/icon-512.png",sizes:"512x512",type:"image/png"},{src:"/icon-192.png",sizes:"192x192",type:"image/png"}]});
+      navigator.mediaSession.playbackState="playing";
+    }catch(e){}
+  }
+  function startBg(){
+    try{
+      makeSounds();
+      bg=new Audio();bg.loop=true;bg.setAttribute("playsinline","");bg.src=urls.quiet;
+      const p=bg.play();bgOn=true;
+      p&&p.catch(()=>{bgOn=false});
+      lockScreen(`طلبك رقم ${num} · ${S.brand}`,"نحضّر طلبك ☕ بنرنّ أول ما يجهز");
+      // لو أوقفه من شاشة القفل نرجّعه (إلا بعد ما يستلم)
+      try{navigator.mediaSession.setActionHandler("pause",()=>{if(!finished&&!coming){bg.play().catch(()=>{})}else stopBg()})}catch(e){}
+    }catch(e){bgOn=false}
+  }
+  function ringBg(){if(!bg)return false;bg.src=urls.ring;bg.loop=true;bg.play().catch(()=>{});lockScreen(`طلبك رقم ${num} جاهز ✨`,"تفضّل استلمه من الكاونتر");return true}
+  function stopBg(){if(!bg)return;try{bg.pause();bg.removeAttribute("src");bg.load()}catch(e){}bg=null;bgOn=false;try{navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState="none"}catch(e){}}
+
   function chime(){
+    if(bgOn&&bg&&!bg.paused){navigator.vibrate&&navigator.vibrate([400,150,400,150,700]);return}
     if(ctx){
       const t=ctx.currentTime;
       [880,1175,1568,1175].forEach((f,i)=>{
@@ -535,13 +577,13 @@ function customer(){
     }
     navigator.vibrate&&navigator.vibrate([400,150,400,150,700]);
   }
-  function stopRing(){clearInterval(loop);loop=null;navigator.vibrate&&navigator.vibrate(0)}
+  function stopRing(){clearInterval(loop);loop=null;navigator.vibrate&&navigator.vibrate(0);stopBg()}
   function becameReady(){
     ready=true;
     $("tLbl").textContent="جهز خلال";
     if(coming){waitingAtCounter();return}
     $("readyView").classList.remove("hidden");
-    chime();loop=setInterval(chime,1800);
+    ringBg();chime();loop=setInterval(chime,1800);
   }
   function waitingAtCounter(){
     stopRing();$("readyView").classList.add("hidden");
@@ -621,6 +663,7 @@ function customer(){
     if(armed)return;armed=true;
     // آيفون: نخلي الصوت يشتغل كوسائط عشان ما ينكتم إذا الجوال على الصامت
     try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}
+    startBg(); // لازم يكون داخل ضغطة الزر نفسها
     try{
       ctx=new (window.AudioContext||window.webkitAudioContext)();
       const b=ctx.createBufferSource();b.buffer=ctx.createBuffer(1,1,22050);b.connect(ctx.destination);b.start();
@@ -631,7 +674,12 @@ function customer(){
     $("cTitle").textContent="نحضّر طلبك الحين";
     $("cSub").textContent="ارتاح.. بنرنّ ونهزّ جوالك أول ما يجهز";
     const pushed=await enablePush();
-    if(!pushed&&isIOS&&!standalone){
+    await new Promise(r=>setTimeout(r,400));
+    if(!pushed&&bgOn&&bg&&!bg.paused){
+      $("pushChip").classList.add("hidden");
+      chip("🔔 بنرنّ حتى لو قفلت الجوال أو فتحت تطبيق ثاني");
+      $("cTip").textContent="بس لا تسكّر سفاري من المهام، وارفع صوت الجوال 🔊";
+    }else if(!pushed&&isIOS&&!standalone){
       $("a2hs").classList.remove("hidden");
       $("cTip").textContent="";
     }else if(!pushed){
